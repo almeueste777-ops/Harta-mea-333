@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>TaxiRută</title>
+  <meta name="description" content="Navigație gratuită pentru taximetriști: rute pe străduțe, ocolește blocajele." />
+  <meta name="theme-color" content="#111418" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TaxiRută" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="/vendor/maplibre-gl.css" />
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <div id="map" aria-label="Hartă"></div>
+
+  <!-- Sus: căutare (în repaus) / instrucțiunea următoare (în navigație) -->
+  <header id="top">
+    <div id="searchBox" class="card">
+      <input id="search" type="search" placeholder="Unde mergem? Adaugă o oprire…" autocomplete="off" enterkeyhint="search" />
+      <button id="btnSettings" class="icon-btn" aria-label="Setări">⚙</button>
+      <ul id="results" hidden></ul>
+    </div>
+    <div id="banner" class="card" hidden>
+      <div id="bnArrow" class="arrow"></div>
+      <div class="bn-text">
+        <div id="bnDist" class="bn-dist"></div>
+        <div id="bnText" class="bn-instr"></div>
+      </div>
+    </div>
+    <div id="bannerNext" hidden></div>
+  </header>
+
+  <!-- Butoane plutitoare -->
+  <div id="fabs">
+    <button id="btnTraffic" class="fab" aria-label="Strat trafic" title="Trafic" hidden>🚦</button>
+    <button id="btnLocate" class="fab" aria-label="Centrează pe mine" title="Centrează">◎</button>
+  </div>
+  <div id="speed" hidden><span id="speedVal">0</span><small>km/h</small></div>
+
+  <!-- Jos: lista zilei / previzualizare rută / navigație -->
+  <section id="sheet" class="card">
+    <!-- 1. Lista zilei -->
+    <div id="pnStops">
+      <div class="sheet-head">
+        <h2>Cursele de azi <span id="stopCount" class="muted"></span></h2>
+        <button id="btnOptimize" class="chip" title="Cea mai bună ordine">⇅ Ordine optimă</button>
+      </div>
+      <ol id="stops"></ol>
+      <p id="emptyHint" class="muted">Caută o adresă sus sau ține apăsat pe hartă ca să adaugi o oprire (max. 10 pe zi).</p>
+      <div class="modes" role="radiogroup" aria-label="Tip rută">
+        <button class="mode" data-mode="rapid" role="radio">Rapid</button>
+        <button class="mode" data-mode="stradute" role="radio">Străduțe</button>
+        <button class="mode" data-mode="maxim" role="radio">Doar străduțe</button>
+      </div>
+      <div class="row">
+        <button id="btnClearDone" class="link">Șterge cursele făcute</button>
+        <span id="trafficState" class="muted small"></span>
+      </div>
+    </div>
+
+    <!-- 2. Previzualizare rută -->
+    <div id="pnPreview" hidden>
+      <div class="sheet-head">
+        <h2 id="pvTitle">Rută</h2>
+        <button id="btnPvClose" class="icon-btn" aria-label="Închide">✕</button>
+      </div>
+      <div id="pvRoutes"></div>
+      <p id="pvNote" class="muted small"></p>
+      <div class="row gap">
+        <button id="btnGo" class="primary big">▶ Pornește</button>
+      </div>
+      <div class="row small">
+        <span class="muted">Deschide în:</span>
+        <span><a id="lnkWaze" class="chip" target="_blank" rel="noopener">Waze</a>
+        <a id="lnkGmaps" class="chip" target="_blank" rel="noopener">Google Maps</a></span>
+      </div>
+    </div>
+
+    <!-- 3. Navigație -->
+    <div id="pnNav" hidden>
+      <div class="nav-stats">
+        <div><b id="nvEta">--:--</b><small>sosire</small></div>
+        <div><b id="nvMin">--</b><small>min</small></div>
+        <div><b id="nvKm">--</b><small>km</small></div>
+      </div>
+      <div id="nvDest" class="muted small ellipsis"></div>
+      <div class="row gap">
+        <button id="btnStuck" class="danger big">🚗💨 Blocat! Ocolește</button>
+        <button id="btnStop" class="secondary">■ Stop</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Setări -->
+  <dialog id="dlgSettings">
+    <form method="dialog">
+      <h2>Setări</h2>
+      <label class="switch"><input type="checkbox" id="setVoice" /> Instrucțiuni vocale</label>
+      <label class="switch"><input type="checkbox" id="setTraffic" /> Evită blocajele (trafic în timp real)</label>
+      <label class="switch"><input type="checkbox" id="setLearn" /> Învață unde stau pe loc și ocolește data viitoare</label>
+      <label class="switch"><input type="checkbox" id="setAutoReroute" /> Caută singur ocolire când stau pe loc</label>
+      <label class="switch"><input type="checkbox" id="setTolls" /> Permite drumuri cu taxă</label>
+      <label>Hartă
+        <select id="setTheme">
+          <option value="auto">Automat (noaptea întunecată)</option>
+          <option value="day">Zi</option>
+          <option value="night">Noapte</option>
+        </select>
+      </label>
+      <p class="muted small" id="learnInfo"></p>
+      <div class="row gap">
+        <button type="button" id="btnForget" class="secondary">Uită locurile învățate</button>
+        <button value="close" class="primary">Gata</button>
+      </div>
+      <p class="muted tiny">Hărți © OpenStreetMap · OpenFreeMap · rutare Valhalla · căutare Photon<span id="ttCredit"></span></p>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/vendor/maplibre-gl.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

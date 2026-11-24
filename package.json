@@ -1,0 +1,16 @@
+{
+  "name": "taxi-ruta",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PWA de navigație gratuită pentru taximetriști: rute pe străduțe, ocolește blocajele.",
+  "scripts": {
+    "vendor": "mkdir -p public/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.js node_modules/maplibre-gl/dist/maplibre-gl.css public/vendor/",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "maplibre-gl": "5.6.0",
+    "wrangler": "4.40.0"
+  },
+  "type": "module"
+}

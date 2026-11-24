@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#ffc107"/>
+  <path d="M120 400 C120 300, 230 330, 240 250 S 330 150, 392 120" fill="none" stroke="#1a1400" stroke-width="34" stroke-linecap="round" stroke-dasharray="1 62"/>
+  <path d="M120 400 C120 300, 230 330, 240 250 S 330 150, 392 120" fill="none" stroke="#1a1400" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="120" cy="400" r="34" fill="#1a1400"/>
+  <circle cx="392" cy="120" r="44" fill="#e11d48" stroke="#1a1400" stroke-width="12"/>
+  <rect x="150" y="76" width="150" height="58" rx="14" fill="#1a1400"/>
+  <text x="225" y="117" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="40" fill="#ffc107" text-anchor="middle">TAXI</text>
+</svg>
