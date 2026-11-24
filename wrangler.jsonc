@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "taxi-ruta",
+  "account_id": "93b743bff871b183cb6787090abb3534",
   "main": "worker/index.js",
   "compatibility_date": "2025-09-01",
   "assets": {
